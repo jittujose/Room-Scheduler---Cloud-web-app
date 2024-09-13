@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Firestore basics</title>
+        <link type="text/css" href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet"/>
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+    <style>
+        /* Style for form container */
+.form-container {
+    width: 300px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for form inputs */
+.form-container input[type="date"],
+.form-container input[type="time"],
+.form-container input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+/* Style for submit button */
+.form-container input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+/* Style for submit button on hover */
+.form-container input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+/* Style for labels */
+.form-container label {
+    font-weight: bold;
+}
+
+    </style>
+    </head>
+<body>
+    <h1>{{ roomname }}</h1>
+    <div class="form-container">
+        <form action="/book-room" method="post">
+            <label for="bookingDate">Date:</label>
+            <input type="date" name="bookingDate"/><br/>
+    
+            <label for="startTime">Start Time:</label>
+            <input type="time" name="startTime"/><br/>
+    
+            <label for="endTime">End Time:</label>
+            <input type="time" name="endTime"/><br/>
+            
+            <input type="hidden" name="user" value="{{user_token}}"/><br/>
+            <input type="hidden" name="room_name" value="{{roomname}}" />
+            
+            <input type="submit" value="Confirm Booking"/>
+        </form>
+    </div>
+    
+</body>
+</html>

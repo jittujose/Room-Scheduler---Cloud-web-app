@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Firestore basics</title>
+        <link type="text/css" href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet"/>
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+    </head>
+<body>
+    <h3>Edit Booking</h3>
+    {% for book in bookings %}
+
+    
+    <form action="/edit-booking" method="post">
+        Room Name<select id="room-selector" name="room_name">
+            {% for room in rooms %}
+                <option value="{{ room.get('name') }}" {% if room.get('name') == book.get('room_name') %} selected {% endif %}>
+                    {{ room.get('name') }}
+                </option>
+            {% endfor %}
+        </select>
+                <br/>
+        Date :<input type="date" name="bookingDate" value="{{book.get('date')}}"/><br/>
+        Start Time :<input type="time" name="startTime" value="{{book.get('start_time')}}"/><br/>
+        End Time :<input type="time" name="endTime" value="{{book.get('end_time')}}"/><br/>
+        
+        <input type="hidden" name="user" value=" {{user_token}}"/><br/>
+        <input type="hidden" name="booking-id" value= "{{ book.get('booking_id') }}" />
+        <input type="submit" value="Apply Changes"/>
+    </form>
+    {% endfor %}
+</body>
+</html>

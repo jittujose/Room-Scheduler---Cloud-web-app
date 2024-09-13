@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Firestore basics</title>
+        <link type="text/css" href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet"/>
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+    </head>
+<body>
+    <div id="login-box" hidden="true">
+        Email :<input type="email" name="" id="email"><br/>
+        Password: <input type="password" name="" id="password"><br/>
+        <button id="login">Login</button>
+        <button id="sign-up">Sign Up</button>
+    </div>
+    <button id="sign-out" hidden="true">Sign out</button>
+
+
+
+        {% if user_token %}
+            <p>User email: {{ user_token.email }}</p>
+            <p>error message: {{ error_message }}</p>
+            <p>Name: {{ user_info.get('name') }}</p>
+
+
+            
+        
+            <form action="/add-Room" method="post">
+                Room Name :<input type="text" name="roomname"/><br/>
+                Address Line 1 :<input type="text" name="address1"/><br/>
+                Address Line 2 :<input type="text" name="address2"/><br/>
+                EIR Code :<input type="text" name="eircode"/><br/>
+                <input type="hidden" name="user" value={user_token}/><br/>
+                <input type="submit" value="Add Address">
+            </form>
+            <p>Room list</p>
+            {% for room in room_list %}
+                <p>Array index {{ loop.index0 }} <p>
+                name:{{ room.get('name') }}<br/>
+                Address line 1:{{ room.get('address1') }}<br/>
+                Address line 2:{{ room.get('address2') }}<br/>
+                eir code:{{ room.get('eircode') }}<br/>
+                Created by:{{ room.get('created_by') }}<br/>
+                <p></p><a href="/book-room?roomname={{ room.get('name') }}">Book this room</a></p><br/>
+                {% if room.get('created_by')== user_token.email %}
+                <form action="/delete-room" method="post">
+                    <input type="hidden" value="{{ room.get('name') }}" name="roomname"/>
+                    <input type="submit" value="Delete Room"/>
+                </form>
+                {% endif %}
+                <form action="/view-book" method="post">
+                    <input type="hidden" value="{{ room.get('name') }}" name="roomname"/>
+                    <input type="submit" value="View Bookings for this Room"/>
+                </form>
+            {% endfor %}
+            <p>Booking list</p>
+            {% for booking in booking_list %}
+            {% if booking.get('room_name') != None %}
+                <p>Array index {{ loop.index0 }} <p>
+                    
+                Room Name:{{ booking.get('room_name') }}<br/>
+                Date:{{ booking.get('date') }}<br/>
+                Start Time:{{ booking.get('start_time') }}<br/>
+                End Time:{{ booking.get('end_time') }}<br/>
+                {% if booking.get('user')== user_token.email %}
+                <form action="/delete-booking" method="post">
+                    <input type="hidden" value="{{ booking.get('booking_id') }}" name="booking-id"/>
+                    <input type="submit" value="Delete Booking"/>
+                </form>
+
+                <form action="/edit-bookingpage" method="post">
+                    <input type="hidden" value= "{{ booking.get('booking_id') }}" name="editbooking_id"/>
+                    <input type="submit" value="Edit Booking"/>
+                </form>
+                {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            <br/>
+        Select Room Name
+        <form action="/filter-booking" method="get">
+            
+            <select id="room_name" name="room_name">
+                {% for room in room_list %}
+                <option value="{{ room.get('name') }}">{{ room.get('name') }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="Apply">
+            </form>
+            <br/>
+            
+            <form action="/date-filter" method="post">
+                Select Date 
+            <select id="date-filter" name="date_filter">
+                {% for date in dateArray %}
+                <option value="{{date}}">{{date}}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="Apply">
+            </form>
+
+        {% endif %}
+
+        
+</body>
+</html>

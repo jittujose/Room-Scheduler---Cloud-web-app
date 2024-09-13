@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firestore Basics</title>
+    <link type="text/css" href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet"/>
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+
+    <style>
+    body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center; /* Center inline elements horizontally */
+        }
+        #add-room-form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #add-room-form input[type="text"],
+        #add-room-form input[type="submit"] {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #add-room-form input[type="submit"] {
+            cursor: pointer;
+            background-color: #5C6BC0;
+            color: white;
+            border: none;
+        }
+
+        #add-room-form input[type="submit"]:hover {
+            background-color: #3949AB;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Center items horizontally */
+            padding: 20px;
+            max-width: 1200px; /* Adjust the max-width as needed */
+            margin: 0 auto; /* Center the container */
+        }
+
+        .card {
+            width: calc(33.33% - 20px); /* Adjust margin accordingly */
+            margin: 0 auto; /* Center the card */
+            margin-bottom: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: #5C6BC0;
+            color: white;
+            padding: 15px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-body p {
+            margin-bottom: 10px;
+        }
+
+        .card-footer {
+            padding: 10px;
+            text-align: right;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        select,
+        button {
+            margin-bottom: 10px;
+        }
+
+        input[type="submit"] {
+            cursor: pointer;
+            background-color: #5C6BC0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+        }
+
+        input[type="submit"]:hover,
+        button:hover {
+            background-color: #3949AB;
+        }
+
+        input[type="submit"]:disabled,
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        
+#login-box {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#login-box input[type="email"],
+#login-box input[type="password"],
+#login-box button {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#login-box button {
+    cursor: pointer;
+    background-color: #5C6BC0;
+    color: white;
+    border: none;
+}
+
+#login-box button:hover {
+    background-color: #3949AB;
+}
+a.book-room-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #5C6BC0;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        a.book-room-link:hover {
+            background-color: #3949AB;
+        }
+    </style>
+</head>
+<body>
+    <br/>
+    <div id="login-box" hidden="true">
+        <input type="email" id="email" placeholder="Email"/>
+        <input type="password" id="password" placeholder="Password"/>
+        <button id="login">Login</button>
+        <button id="sign-up">Sign Up</button>
+    </div>
+    <br/>
+    <button id="sign-out" hidden="true">Sign out</button>
+
+    {% if user_token %}
+        <div id="user-info">
+            <p>User email: {{ user_token.email }}</p>
+        </div>
+
+        <div id="add-room-form">
+            <form action="/add-Room" method="post">
+                <input type="text" name="roomname" placeholder="Room Name"/>
+                <input type="text" name="address1" placeholder="Address Line 1"/>
+                <input type="text" name="address2" placeholder="Address Line 2"/>
+                <input type="text" name="eircode" placeholder="EIR Code"/>
+                <input type="hidden" name="user" value="{{ user_token }}"/>
+                <input type="submit" value="Add New Room">
+            </form>
+        </div>
+
+        <div id="room-list" style="text-align: center;
+        vertical-align: middle;">
+            <h2>Room List</h2>
+            {% for room in room_list %}
+                <div class="card">
+                    <div class="card-header">
+                        <h3>{{ room.get('name') }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Address Line 1: {{ room.get('address1') }}</p>
+                        <p>Address Line 2: {{ room.get('address2') }}</p>
+                        <p>EIR Code: {{ room.get('eircode') }}</p>
+                        <p>Created by: {{ room.get('created_by') }}</p>
+                        <a href="/book-room?roomname={{ room.get('name') }}" class="book-room-link">Book this room</a>
+                        {% if room.get('created_by') == user_token.email %}
+                            <form action="/delete-room" method="post">
+                                <input type="hidden" value="{{ room.get('name') }}" name="roomname"/>
+                                <input type="submit" value="Delete Room"/>
+                            </form>
+                        {% endif %}
+                        <form action="/view-book" method="post">
+                            <input type="hidden" value="{{ room.get('name') }}" name="roomname"/>
+                            <input type="submit" value="View Bookings for this Room"/>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div id="booking-list">
+            <h2>Booking List</h2>
+            <div id="filter-forms">
+                <h4>Filter Bookings</h4>
+                <form action="/filter-booking" method="post">
+                    <select id="room_name" name="room_name">
+                        {% for room in room_list %}
+                            <option value="{{ room.get('name') }}">{{ room.get('name') }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="submit" value="Filter by Room">
+                </form>
+                <form action="/date-filter" method="post">
+                    <select id="date-filter" name="date_filter">
+                        {% for date in dateArray %}
+                            <option value="{{ date }}">{{ date }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="submit" value="Filter by Date">
+                </form>
+                <form action="/" method="get">
+                    <input type="submit" value="Clear Filters">
+                </form>
+            </div>
+
+            <br/>
+            {% for booking in booking_list %}
+                {% if booking.get('room_name') != None %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Booking for {{ booking.get('room_name') }}</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Date: {{ booking.get('date') }}</p>
+                            <p>Start Time: {{ booking.get('start_time') }}</p>
+                            <p>End Time: {{ booking.get('end_time') }}</p>
+                            {% if booking.get('user') == user_token.email %}
+                                <form action="/delete-booking" method="post">
+                                    <input type="hidden" value="{{ booking.get('booking_id') }}" name="booking-id"/>
+                                    <input type="submit" value="Delete Booking"/>
+                                </form>
+                                <form action="/edit-bookingpage" method="post">
+                                    <input type="hidden" value="{{ booking.get('booking_id') }}" name="editbooking_id"/>
+                                    <input type="submit" value="Edit Booking"/>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        
+    {% endif %}
+</body>
+</html>
+
+
+
+
